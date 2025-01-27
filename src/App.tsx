@@ -21,13 +21,26 @@ function App() {
   const [tasksMode, setTasksMode] = useState<string>("all");
   const [searchText, setSearchText] = useState<string>("");
 
-  const handleChangeTask = (id: number, text: string) => {
+  const handleChangeTaskText = (id: number, text: string) => {
     const currentTask = tasks.filter((task) => task.id === id)[0];
-    const cleanTasks = tasks.filter((task) => task.id !== id);
+    const currentTaskID = tasks.findIndex((task) => task.id === id);
 
     currentTask.text = text;
+    const newTasks = [...tasks];
+    newTasks.fill(currentTask, currentTaskID, currentTaskID + 1);
 
-    setTasks([...cleanTasks, currentTask]);
+    setTasks(newTasks);
+  };
+
+  const handleChangeTaskActive = (id: number) => {
+    const currentTask = tasks.filter((task) => task.id === id)[0];
+    const currentTaskID = tasks.findIndex((task) => task.id === id);
+
+    currentTask.active = !currentTask.active;
+    const newTasks = [...tasks];
+    newTasks.fill(currentTask, currentTaskID, currentTaskID + 1);
+
+    setTasks(newTasks);
   };
 
   const handleSubmitSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -94,27 +107,33 @@ function App() {
       </div>
 
       {/* control buttons */}
-      <div className="space-x-2 m-4">
-        <Button
-          onClick={() => setTasksMode("all")}
-          variant={tasksMode === "all" ? "default" : "secondary"}
-        >
-          All
-        </Button>
-        <Button
-          onClick={() => setTasksMode("active")}
-          variant={tasksMode === "active" ? "default" : "secondary"}
-        >
-          Active
-        </Button>
+      <div className="flex justify-start m-4">
+        <div className="space-x-2">
+          <Button
+            onClick={() => setTasksMode("all")}
+            variant={tasksMode === "all" ? "default" : "secondary"}
+          >
+            All
+          </Button>
+          <Button
+            onClick={() => setTasksMode("active")}
+            variant={tasksMode === "active" ? "default" : "secondary"}
+          >
+            Active
+          </Button>
 
+          <Button
+            onClick={() => setTasksMode("completed")}
+            variant={tasksMode === "completed" ? "default" : "secondary"}
+          >
+            Completed
+          </Button>
+        </div>
         <Button
-          onClick={() => setTasksMode("completed")}
-          variant={tasksMode === "completed" ? "default" : "secondary"}
+          className="ml-8"
+          onClick={() => setTasks([])}
+          variant={"secondary"}
         >
-          Completed
-        </Button>
-        <Button onClick={() => setTasks([])} variant={"secondary"}>
           Clear all
         </Button>
       </div>
@@ -125,9 +144,12 @@ function App() {
           key={task.id}
           className="flex justify-between items-center m-6 w-1/4 space-x-2"
         >
-          <Checkbox></Checkbox>
+          <Checkbox
+            onClick={() => handleChangeTaskActive(task.id)}
+            checked={!task.active}
+          ></Checkbox>
           <Input
-            onChange={(e) => handleChangeTask(task.id, e.target.value)}
+            onChange={(e) => handleChangeTaskText(task.id, e.target.value)}
             type="text"
             placeholder="What needs to be done?"
             value={task.text}
